@@ -7,3 +7,4 @@ def get_connection():
         password="",          # Your MySQL password
         database="library_db"
     )
+# hoyr database is completed in one table ?
