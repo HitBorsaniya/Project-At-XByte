@@ -114,7 +114,7 @@ while has_more:
         rating = info.get("rating", {}).get("aggregate_rating", "0") if isinstance(info.get("rating"), dict) else "0"
         votes = info.get("rating", {}).get("votes", "0") if isinstance(info.get("rating"), dict) else "0"
         cost = info.get("cft", {}).get("text", "") if isinstance(info.get("cft"), dict) else ""
-        delivery_time = item.get("order", {}).get("deliveryTime", "") if isinstance(item.get("order"), dict) else ""
+        delivery_time = item['order']['deliveryTime'] or ""
         offers = ", ".join([o.get("text", "") for o in item.get("bulkOffers", []) if isinstance(o, dict)]) if item.get(
             "bulkOffers") else ""
         distance = item.get("distance", "")

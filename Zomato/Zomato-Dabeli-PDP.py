@@ -66,11 +66,37 @@ for item in data:
 
     tree = html.fromstring(response.text)
 
+    image = tree.xpath('//img[@class="sc-s1isp7-5 eQUAyn"]/@src')
+    image = " | ".join(img for img in image) or " "
     address = tree.xpath('//div[@class="sc-clNaTc ckqoPM"]/text()') or ''
+    time = tree.xpath('//span[@class="sc-kasBVs dfwCXs"]/text()') or " "
+    Avg_Cost = tree.xpath('//p[@class="sc-1hez2tp-0 sc-bocRTG iZcldW"]/text()') or " "
     mobile = tree.xpath('//a[@class="sc-bFADNz leEVAg"]/text()') or ''
-    Cuisines = tree.xpath('//div[text()="Cuisines"]/following-sibling::div/a/div/text()') or ''
+    Cuisines = tree.xpath('//div[text()="Cuisines"]/following-sibling::div/a/div/text()') or " "
     More_Info = tree.xpath('//h3[text()="More Info"]/following-sibling::div//div/p/text()') or ''
     More_Info = " | ".join(data for data in More_Info) if More_Info else ''
+    Related_Content = tree.xpath('//h6[contains(text(),"Related to ")]/following-sibling::div[@class="sc-iWadT XrbmL"]/a/text()') or " "
+    print(Related_Content)
+    Related_Content = " ".join(data for data in Related_Content if data) or ''
+    Around_Resto = tree.xpath('//h6[contains(text(),"Restaurants around")]/following-sibling::div[@class="sc-iWadT XrbmL"]/a/text()') or " "
+    Around_Resto = " ".join(data for data in Around_Resto if data) or ''
+    Frenchises = tree.xpath('//h6[contains(text(),"Frequent searches leading")]/following-sibling::div[@class="sc-iWadT XrbmL"]/a/text()') or " "
+    Frenchises = " ".join(data for data in Frenchises if data) or ''
+
+    data = {
+        'image': image,
+        'address': address[0].strip(),
+        'time': time[0].strip(),
+        'Avg_Cost': Avg_Cost[0].strip(),
+        'mobile': mobile[0].strip(),
+        'Cuisines': Cuisines[0].strip(),
+        'More_Info': More_Info,
+        'Related_Content': Related_Content,
+        'Around_Resto': Around_Resto,
+        'Frenchises': Frenchises,
+    }
+
+    # print(data)
 
 
 
