@@ -126,7 +126,7 @@ while has_more:
                            "Offers": offers, "Distance": distance, "Order URL": order_url, "status": "pending"}
         print(restaurant_data)
 
-    meta = sections.get('SECTION_SEARCH_META_INFO', {}).get('searchMetaData', {})
+    meta = sections.get('SECTION_SEARCH_M   ETA_INFO', {}).get('searchMetaData', {})
     has_more = meta.get('hasMore', False)
     postback = meta.get('postbackParams', '{}')
     postback_data = json.loads(postback) if postback else {}
