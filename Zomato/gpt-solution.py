@@ -1,93 +1,89 @@
-import requests
 import json
-import time
+import hashlib
+import os
+from curl_cffi import requests
+import db_config
 
-url = "https://www.zomato.com/webroutes/search/home"
+folder = r"D:\15-12-2025\Task 1\PL-Page-Save-json-new"
+if os.path.exists(folder):
+    print("Folder available")
+else:
+    os.makedirs(folder)
+print("Folder created")
+session = requests.Session(impersonate="chrome120", timeout=30, verify=False)
+API_URL = "https://www.zomato.com/webroutes/search/home"
+cookies = {'fbcity': '11', 'fre': '0', 'rd': '1380000', 'zl': 'en', 'fbtrack': 'ce0ebf8e08cf507863470aba2628f624',
+           'ltv': '11', 'lty': '11',
+           'locus': '%7B%22addressId%22%3A0%2C%22lat%22%3A23.042662%2C%22lng%22%3A72.566729%2C%22cityId%22%3A11%2C%22ltv%22%3A11%2C%22lty%22%3A%22city%22%2C%22fetchFromGoogle%22%3Afalse%2C%22dszId%22%3A3720%2C%22fen%22%3A%22Ahmedabad%22%7D',
+           'gcl_au': '1.1.825515299.1765272424', '_fbp': 'fb.1.1765272424860.17613684239945907',
+           '_gid': 'GA1.2.2011525945.1765791961',
+           'ak_bmsc': 'F4D39A656B4B37D4717F28E160CE6C1F~000000000000000000000000000000~YAAQXrEXAgpSM+2aAQAA6OvAJh483inVLbP0RRP4ndqHKSn4dStS1rzlD5sR4EEvsRFHVGDS/A4BcSyeGozXd0GakUuJbMa2qbFVVjp/TAnWWSpCMNMM1x3oLZwGBNehjfavjUhs3Tj0LjJjWffBbyLtksOvlzzcWhzVmWr9UrMRih6FPmb9nJiYpCZxtEurWRPNYtgIN1nwFgCHeizrwNkxfRqVvX2JJSrtq0LExRg8Xja4TmYKcCnKqOwOZlW4dMc/IXiV70dzXLEgKTYyiuUuRLtWkp47CQJrsub9nenaPjWCv2dxh6eJYpw9nSXZT3Z/tqYoT7Qc5G/3Guc1v054SyaEvXyqj+o2fKtXFcGFHxHRX2rQJUqkNM5cRusBK5/o1NZq1CM7r0nrYw==',
+           'PHPSESSID': '87e4159f638d23ac1350b5dceefa5450', 'csrf': 'f4879634ab740d70881c119ab81c1893',
+           '_gat_global': '1', '_gat_city': '1', '_gat_country': '1',
+           '_abck': '9B54C6CE2A10E2B7FA8D571E02A74383~-1~YAAQXrEXAhxkM+2aAQAAhzjBJg9l6n5hBvily1rNCK0vXP/CjB+RkV3wKprb7Gi6Zb0eVNLfR2QHZN5vG8e/it9xXw3qh/Kq6nfQdTKhSFptp8e/ZxL5InIT9Mf92BxZnTRikgw56TfHpkcKAhbVe92CK679WQ3CYku8TOMILiZku4Z4pIetdsLUJYNas6Qyj0x9b8m8wl2/QzjON4yVC75agUPGpBtBWhubf15p18U8RWuGqIHvKDpuc4z+uk8aQYQNwtWzMXGHWoSl4VdwGt4fv/H3vkPrRkbXf9Ipyw1K7xv8sfwYQkUYitb1FdI6BaObe0ua23Cg3VcYMYw7FlD9qm2VP1qZnC8ULw68miNklMvwKcZUlVzzKpIJX39EFCQCHbfwAEOTO/QZO/X6sis/1LSwX8FTggklGmdW4g5+FF7jV6PlPZpst3YaswpGi+L9qCLm/IWznhXDeRetEA4dG7cq~-1~-1~-1~-1~-1',
+           '_ga_2XVFHLPTVP': 'GS2.1.s1765881747$o4$g1$t1765881755$j52$l0$h0', '_ga': 'GA1.1.728334738.1765272424',
+           '_ga_2NKE6R5GNY': 'GS2.2.s1765881747$o4$g1$t1765881755$j52$l0$h0',
+           '_ga_X6B66E85ZJ': 'GS2.2.s1765881747$o4$g1$t1765881755$j52$l0$h0',
+           'AWSALBTG': 'x629dzrsjVfH5EYxMOWYdTaIimY7CkU/Zw/VWKimUzuRriH7nOepFBO21a7rvsK7N5er9xnLEJ1JtyTU9DE12tIRoul/pXNfzuJVGh80K0Exvfray1j0T32lMOEajC6oeZG3T8e8VG46J0Xxt/A4CipT5/mogBdALrFCJn5p9r1L',
+           'AWSALBTGCORS': 'x629dzrsjVfH5EYxMOWYdTaIimY7CkU/Zw/VWKimUzuRriH7nOepFBO21a7rvsK7N5er9xnLEJ1JtyTU9DE12tIRoul/pXNfzuJVGh80K0Exvfray1j0T32lMOEajC6oeZG3T8e8VG46J0Xxt/A4CipT5/mogBdALrFCJn5p9r1L',
+           'g_state': '{"i_l":0,"i_ll":1765881756263,"i_b":"37RSH5bVWXgProLft08L/XBEmqTn2du8DeZ2QYNFXPw","i_e":{"enable_itp_optimization":0}}',
+           '_dd_s': 'aid=ecacf9d9-324e-489d-ae5f-2de96800d4ea&rum=0&expire=1765882660545', }
+headers = {'accept': '/', 'accept-language': 'en-US,en;q=0.9', 'content-type': 'application/json',
+           'origin': 'https://www.zomato.com', 'priority': 'u=1, i',
+           'referer': 'https://www.zomato.com/ahmedabad/delivery/dish-dosa',
+           'sec-ch-ua': '"Chromium";v="142", "Google Chrome";v="142", "Not_A Brand";v="99"', 'sec-ch-ua-mobile': '?0',
+           'sec-ch-ua-platform': '"Windows"', 'sec-fetch-dest': 'empty', 'sec-fetch-mode': 'cors',
+           'sec-fetch-site': 'same-origin',
+           'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+           'x-zomato-csrft': 'f4879634ab740d70881c119ab81c1893',
+           'cookie': 'fbcity=11; fre=0; rd=1380000; zl=en; fbtrack=ce0ebf8e08cf507863470aba2628f624; ltv=11; lty=11; locus=%7B%22addressId%22%3A0%2C%22lat%22%3A23.042662%2C%22lng%22%3A72.566729%2C%22cityId%22%3A11%2C%22ltv%22%3A11%2C%22lty%22%3A%22city%22%2C%22fetchFromGoogle%22%3Afalse%2C%22dszId%22%3A3720%2C%22fen%22%3A%22Ahmedabad%22%7D; _gcl_au=1.1.825515299.1765272424; _fbp=fb.1.1765272424860.17613684239945907; _gid=GA1.2.2011525945.1765791961; ak_bmsc=F4D39A656B4B37D4717F28E160CE6C1F~000000000000000000000000000000~YAAQXrEXAgpSM+2aAQAA6OvAJh483inVLbP0RRP4ndqHKSn4dStS1rzlD5sR4EEvsRFHVGDS/A4BcSyeGozXd0GakUuJbMa2qbFVVjp/TAnWWSpCMNMM1x3oLZwGBNehjfavjUhs3Tj0LjJjWffBbyLtksOvlzzcWhzVmWr9UrMRih6FPmb9nJiYpCZxtEurWRPNYtgIN1nwFgCHeizrwNkxfRqVvX2JJSrtq0LExRg8Xja4TmYKcCnKqOwOZlW4dMc/IXiV70dzXLEgKTYyiuUuRLtWkp47CQJrsub9nenaPjWCv2dxh6eJYpw9nSXZT3Z/tqYoT7Qc5G/3Guc1v054SyaEvXyqj+o2fKtXFcGFHxHRX2rQJUqkNM5cRusBK5/o1NZq1CM7r0nrYw==; PHPSESSID=87e4159f638d23ac1350b5dceefa5450; csrf=f4879634ab740d70881c119ab81c1893; _gat_global=1; _gat_city=1; _gat_country=1; _abck=9B54C6CE2A10E2B7FA8D571E02A74383~-1~YAAQXrEXAhxkM+2aAQAAhzjBJg9l6n5hBvily1rNCK0vXP/CjB+RkV3wKprb7Gi6Zb0eVNLfR2QHZN5vG8e/it9xXw3qh/Kq6nfQdTKhSFptp8e/ZxL5InIT9Mf92BxZnTRikgw56TfHpkcKAhbVe92CK679WQ3CYku8TOMILiZku4Z4pIetdsLUJYNas6Qyj0x9b8m8wl2/QzjON4yVC75agUPGpBtBWhubf15p18U8RWuGqIHvKDpuc4z+uk8aQYQNwtWzMXGHWoSl4VdwGt4fv/H3vkPrRkbXf9Ipyw1K7xv8sfwYQkUYitb1FdI6BaObe0ua23Cg3VcYMYw7FlD9qm2VP1qZnC8ULw68miNklMvwKcZUlVzzKpIJX39EFCQCHbfwAEOTO/QZO/X6sis/1LSwX8FTggklGmdW4g5+FF7jV6PlPZpst3YaswpGi+L9qCLm/IWznhXDeRetEA4dG7cq~-1~-1~-1~-1~-1; _ga_2XVFHLPTVP=GS2.1.s1765881747$o4$g1$t1765881755$j52$l0$h0; _ga=GA1.1.728334738.1765272424; _ga_2NKE6R5GNY=GS2.2.s1765881747$o4$g1$t1765881755$j52$l0$h0; _ga_X6B66E85ZJ=GS2.2.s1765881747$o4$g1$t1765881755$j52$l0$h0; AWSALBTG=x629dzrsjVfH5EYxMOWYdTaIimY7CkU/Zw/VWKimUzuRriH7nOepFBO21a7rvsK7N5er9xnLEJ1JtyTU9DE12tIRoul/pXNfzuJVGh80K0Exvfray1j0T32lMOEajC6oeZG3T8e8VG46J0Xxt/A4CipT5/mogBdALrFCJn5p9r1L; AWSALBTGCORS=x629dzrsjVfH5EYxMOWYdTaIimY7CkU/Zw/VWKimUzuRriH7nOepFBO21a7rvsK7N5er9xnLEJ1JtyTU9DE12tIRoul/pXNfzuJVGh80K0Exvfray1j0T32lMOEajC6oeZG3T8e8VG46J0Xxt/A4CipT5/mogBdALrFCJn5p9r1L; g_state={"i_l":0,"i_ll":1765881756263,"i_b":"37RSH5bVWXgProLft08L/XBEmqTn2du8DeZ2QYNFXPw","i_e":{"enable_itp_optimization":0}}; _dd_s=aid=ecacf9d9-324e-489d-ae5f-2de96800d4ea&rum=0&expire=1765882660545', }
+json_data = {'context': 'delivery',
+             'filters': '{"searchMetadata":{"previousSearchParams":"{\\"PreviousSearchId\\":\\"da0855c9-367d-4a0a-ae29-49f4e1cbf07f\\",\\"PreviousSearchFilter\\":[\\"{\\\\\\"category_context\\\\\\":\\\\\\"delivery_home\\\\\\"}\\",\\"\\",\\"{\\\\\\"universal_dish_ids\\\\\\":[\\\\\\"10296\\\\\\"]}\\"]}","postbackParams":"{\\"processed_chain_ids\\":[18603039,113551,110347,110805,21675405,111775,111836,21171501,21915110],\\"shown_res_count\\":9,\\"search_id\\":\\"da0855c9-367d-4a0a-ae29-49f4e1cbf07f\\"}","totalResults":173,"hasMore":true,"getInactive":false},"dineoutAdsMetaData":{},"appliedFilter":[{"filterType":"category_sheet","filterValue":"delivery_home","isHidden":true,"isApplied":true,"postKey":"{\\"category_context\\":\\"delivery_home\\"}"},{"filterType":"universal_dish_id","filterValue":"10296","isApplied":true,"postKey":"{\\"universal_dish_ids\\":[\\"10296\\"]}"}],"urlParamsForAds":{}}',
+             'addressId': 0, 'entityId': 11, 'entityType': 'city', 'locationType': '', 'isOrderLocation': 1,
+             'cityId': 11, 'latitude': '23.0426620000000000', 'longitude': '72.5667290000000000',
+             'userDefinedLatitude': 23.042662, 'userDefinedLongitude': 72.566729, 'entityName': 'Ahmedabad',
+             'orderLocationName': 'Ahmedabad', 'cityName': 'Ahmedabad', 'countryId': 1, 'countryName': 'India',
+             'displayTitle': 'Ahmedabad', 'o2Serviceable': True, 'placeId': '3720', 'cellId': '4133887237286789120',
+             'deliverySubzoneId': 3720, 'placeType': 'DSZ', 'placeName': 'Ahmedabad', 'isO2City': True,
+             'fetchFromGoogle': False, 'fetchedFromCookie': True, 'isO2OnlyCity': False, 'address_template': [],
+             # 'otherRestaurantsUrl': '', }
+             response = requests.post('https://www.zomato.com/webroutes/search/home', cookies=cookies, headers=headers,
+                                      json=json_data)
 
-headers = {
-    "accept": "*/*",
-    "content-type": "application/json",
-    "origin": "https://www.zomato.com",
-    "referer": "https://www.zomato.com/ahmedabad/delivery/dish-dosa",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
-    "x-zomato-csrft": "d9a1e2939e03d2c425adfec5206a45f9",
-}
 
-cookies = {
-    "csrf": "d9a1e2939e03d2c425adfec5206a45f9",
-    "fbcity": "11",
-}
+def fetch_all_restaurants(limit=3000):
 
-processed_chain_ids = []
-shown = 0
-search_id = "0c86c715-1486-41a7-b022-2b8ee29b7333"
+count = 0
 
-all_names = set()
 
-while True:
-    filters = {
-        "searchMetadata": {
-            "previousSearchParams": json.dumps({
-                "PreviousSearchId": search_id,
-                "PreviousSearchFilter": [
-                    {"category_context": "delivery_home"},
-                    "",
-                    {"universal_dish_ids": ["10296"]}
-                ]
-            })
-        },
-        "postbackParams": json.dumps({
-            "processed_chain_ids": processed_chain_ids,
-            "shown_res_count": shown,
-            "search_id": search_id
-        }),
-        "totalResults": 35,
-        "hasMore": True,
-        "getInactive": False
-    }
-
-    payload = {
-        "context": "delivery",
-        "filters": json.dumps(filters),
-        "addressId": 0,
-        "entityId": 11,
-        "entityType": "city",
-        "cityId": 11,
-        "latitude": "23.042662",
-        "longitude": "72.566729",
-        "placeId": "3720",
-        "isO2City": True
-    }
-
-    r = requests.post(url, headers=headers, cookies=cookies, json=payload)
-    print("Status:", r.status_code)
-
-    if r.status_code != 200:
-        break
-
-    data = r.json()
-
-    results = data["sections"]["SECTION_SEARCH_RESULT"]
-    meta = data["sections"]["SECTION_SEARCH_META_INFO"]["searchMetaData"]
-
-    if not results:
-        break
-
-    for item in results:
-        info = item["info"]
-        name = info["name"]
-        all_names.add(name)
-        print(name)
-
-        chain_id = info.get("chain_id")
-        if chain_id and chain_id not in processed_chain_ids:
-            processed_chain_ids.append(chain_id)
-
-    shown += len(results)
-
-    if not meta["hasMore"]:
-        break
-
-    time.sleep(1.5)  # IMPORTANT: slow down
-
-print("\nTOTAL UNIQUE RESTAURANTS:", len(all_names))
+page_num = 1
+has_more = True
+while has_more and count < limit:
+    response = session.post(API_URL, headers=headers, cookies=cookies,
+                                                                  json=json_data)
+if response.status_code != 200:             print(f"Failed at page {page_num}, status code: {response.status_code}")
+break
+data_json = response.json()
+sections = data_json.get("sections", {})
+items = sections.get("SECTION_SEARCH_RESULT", [])
+if not items:             break
+for item in items:             info = item.get("info", {})
+cuisine_list = info.get("cuisine", [])
+cuisines = ", ".join([c.get("name", "") for c in cuisine_list if isinstance(c, dict)]) if isinstance(cuisine_list,
+                                                                                                     list) else ""
+rating = info.get("rating", {}).get("aggregate_rating", "0") if isinstance(info.get("rating"), dict) else "0"
+votes = info.get("rating", {}).get("votes", "0") if isinstance(info.get("rating"), dict) else "0"
+cost = info.get("cft", {}).get("text", "") if isinstance(info.get("cft"), dict) else ""
+delivery_time = item.get("order", {}).get("deliveryTime", "") if isinstance(item.get("order"), dict) else ""
+offers = ", ".join([o.get("text", "") for o in item.get("bulkOffers", []) if isinstance(o, dict)]) if item.get(
+    "bulkOffers") else ""
+distance = item.get("distance", "")
+order_url = "https://www.zomato.com" + item.get("cardAction", {}).get("clickUrl", "") if isinstance(
+    item.get("cardAction"), dict) else ""
+restaurant_data = {"Restaurant Name": info.get("name", ""), "Res_id": info.get("resId", ""), "Cuisines": cuisines,
+                   "Rating": rating, "Reviews": votes, "Cost for Two": cost, "Delivery Time": delivery_time,
+                   "Offers": offers, "Distance": distance, "Order URL": order_url, "status": "pending"}
+print(restaurant_data)
+try:                 db_config.pl.update_one({'Restaurant Name': restaurant_data['Restaurant Name']},
+                                             {'$set': restaurant_data},
+                                             upsert=True)  # db_config.pl.insert_one(restaurant_data)                 # print(f"Inserted restaurant {restaurant_data['Restaurant Name']}")             except Exception as e:                 print(e)             # if insert_restaurant(restaurant_data):             #     count += 1             #     print(f"[{count}] Inserted: {restaurant_data['Restaurant Name']}")             # else:             #     print(f"[{count}] Duplicate skipped: {restaurant_data['Restaurant Name']}")             #             # if count >= limit:             #     return         meta = sections.get('SECTION_SEARCH_META_INFO', {}).get('searchMetaData', {})         has_more = meta.get('hasMore', False)         postback = meta.get('postbackParams', '{}')         postback_data = json.loads(postback) if postback else {}         processed_ids = postback_data.get("processed_chain_ids", [])         if has_more:             filters_dict = json.loads(json_data['filters'])             postback_dict = json.loads(filters_dict['searchMetadata']['postbackParams'])             postback_dict['processed_chain_ids'] = processed_ids             postback_dict['shown_res_count'] = len(processed_ids)             filters_dict['searchMetadata']['postbackParams'] = json.dumps(postback_dict)             json_data['filters'] = json.dumps(filters_dict)             page_num += 1 if __name_ == "_main":     fetch_all_restaurants() # count = 0 # page_num = 1 # has_more = True # # # while has_more and count < 150: # #     response = session.post(API_URL, headers=headers, cookies=cookies, json=json_data) #     if response.status_code != 200: #         print(f"Failed at page {page_num}, status code: {response.status_code}") #         break # #     data_json = response.json() #     sections = data_json.get("sections", {}) #     items = sections.get("SECTION_SEARCH_RESULT", []) # #     if not items: #         break # #     for item in items: #         info = item.get("info", {}) #         cuisine_list = info.get("cuisine", []) #         cuisines = ", ".join([c.get("name", "") for c in cuisine_list if isinstance(c, dict)]) if isinstance( #             cuisine_list, list) else "" #         rating = info.get("rating", {}).get("aggregate_rating", "0") if isinstance(info.get("rating"), dict) else "0" #         votes = info.get("rating", {}).get("votes", "0") if isinstance(info.get("rating"), dict) else "0" #         cost = info.get("cft", {}).get("text", "") if isinstance(info.get("cft"), dict) else "" #         delivery_time = item.get("order", {}).get("deliveryTime", "") if isinstance(item.get("order"), dict) else "" #         offers = ", ".join([o.get("text", "") for o in item.get("bulkOffers", []) if isinstance(o, dict)]) if item.get( #             "bulkOffers") else "" #         distance = item.get("distance", "") #         order_url = "https://www.zomato.com" + item.get("cardAction", {}).get("clickUrl", "") if isinstance( #             item.get("cardAction"), dict) else "" # #         restaurant_data = { #             "Restaurant Name": info.get("name", ""), #             "Res_id": info.get("resId", ""), #             "Cuisines": cuisines, #             "Rating": rating, #             "Reviews": votes, #             "Cost for Two": cost, #             "Delivery Time": delivery_time, #             "Offers": offers, #             "Distance": distance, #             "Order URL": order_url, #             "status": "pending" #         }         # print(restaurant_data)         # try:         #     db_config.pl.update_one({'Restaurant Name': restaurant_data['Restaurant Name']}, {'$set': restaurant_data},         #                             upsert=True)         #     # db_config.pl.insert_one(restaurant_data)         #     # print(f"Inserted restaurant {restaurant_data['Restaurant Name']}")         # except Exception as e:         #     print(e)     # meta = sections.get('SECTION_SEARCH_META_INFO', {}).get('searchMetaData', {})     # has_more = meta.get('hasMore', False)     # postback = meta.get('postbackParams', '{}')     # postback_data = json.loads(postback) if postback else {}     # processed_ids = postback_data.get("processed_chain_ids", [])     #     # if has_more:     #     filters_dict = json.loads(json_data['filters'])     #     postback_dict = json.loads(filters_dict['searchMetadata']['postbackParams'])     #     postback_dict['processed_chain_ids'] = processed_ids     #     postback_dict['shown_res_count'] = len(processed_ids)     #     filters_dict['searchMetadata']['postbackParams'] = json.dumps(postback_dict)     #     json_data['filters'] = json.dumps(filters_dict)     #     page_num += 1 # ----------------------------------------------------------------------------------     # url = API_URL     #     # enc = url.encode('utf-8')     # hashcode = str(int(hashlib.md5(enc).hexdigest(), 16) % (10 ** 10))     # path = f"pl-page-save-{hashcode}.json"     # path = os.path.join(folder, path_)     #     # response = session.post(url, cookies=cookies, headers=headers, json=json_data)     # if response.status_code == 200:     #     with open(path, 'w', encoding='utf-8') as f:     #         f.write(response.text)     #     # else:     #     print(f"Failed at page {page_num}, status code: {response.status_code}")     #     # data_json = response.json()     # sections = data_json.get("sections", {})     # items = sections.get("SECTION_SEARCH_RESULT", [])     #     # if not items:     #     break     #     # for item in items:     #     info = item.get("info", {})     #     cuisine_list = info.get("cuisine", [])     #     cuisines = ", ".join([c.get("name", "") for c in cuisine_list if isinstance(c, dict)]) if isinstance(     #         cuisine_list, list) else ""     #     rating = info.get("rating", {}).get("aggregate_rating", "0") if isinstance(info.get("rating"), dict) else "0"     #     votes = info.get("rating", {}).get("votes", "0") if isinstance(info.get("rating"), dict) else "0"     #     cost = info.get("cft", {}).get("text", "") if isinstance(info.get("cft"), dict) else ""     #     delivery_time = item.get("order", {}).get("deliveryTime", "") if isinstance(item.get("order"), dict) else ""     #     offers = ", ".join([o.get("text", "") for o in item.get("bulkOffers", []) if isinstance(o, dict)]) if item.get(     #         "bulkOffers") else ""     #     distance = item.get("distance", "")     #     order_url = "https://www.zomato.com" + item.get("cardAction", {}).get("clickUrl", "") if isinstance(     #         item.get("cardAction"), dict) else ""     #     #     restaurant_data = {     #         "Restaurant Name": info.get("name", ""),     #         "Res_id": info.get("resId", ""),     #         "Cuisines": cuisines,     #         "Rating": rating,     #         "Reviews": votes,     #         "Cost for Two": cost,     #         "Delivery Time": delivery_time,     #         "Offers": offers,     #         "Distance": distance,     #         "Order URL": order_url,     #         "status": "pending"     #     }     #     #     print(restaurant_data)     #     # meta = sections.get('SECTION_SEARCH_META_INFO', {}).get('searchMetaData', {})     # has_more = meta.get('hasMore', False)     # postback = meta.get('postbackParams', '{}')     # postback_data = json.loads(postback) if postback else {}     # processed_ids = postback_data.get("processed_chain_ids", [])     #     # if has_more and page_num < 150:     #     filters_dict = json.loads(json_data['filters'])     #     postback_dict = json.loads(filters_dict['searchMetadata']['postbackParams'])     #     postback_dict['processed_chain_ids'] = processed_ids     #     postback_dict['shown_res_count'] = len(processed_ids)     #     filters_dict['searchMetadata']['postbackParams'] = json.dumps(postback_dict)     #     json_data['filters'] = json.dumps(filters_dict)     #     page_num += 1#

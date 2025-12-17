@@ -49,172 +49,71 @@ headers = {
 }
 
 
+def fetch_restaurants():
+    session = create_session()
+    page_num = 1
+    has_more = True
 
-# response = requests.post('https://www.zomato.com/webroutes/search/home', cookies=cookies, headers=headers, json=json_data)
+    while has_more and page_num <= 150:
+        response = session.post(
+            API_URL,
+            headers=headers,
+            cookies=cookies,
+            json=json_data,
+            timeout=30
+        )
 
-# Note: json_data will not be serialized by requests
-# exactly as it was in the original request.
-#data = '{"context":"delivery","filters":"{\\"searchMetadata\\":{\\"previousSearchParams\\":\\"{\\\\\\"PreviousSearchId\\\\\\":\\\\\\"0c86c715-1486-41a7-b022-2b8ee29b7333\\\\\\",\\\\\\"PreviousSearchFilter\\\\\\":[\\\\\\"{\\\\\\\\\\\\\\"category_context\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"delivery_home\\\\\\\\\\\\\\"}\\\\\\",\\\\\\"\\\\\\",\\\\\\"{\\\\\\\\\\\\\\"universal_dish_ids\\\\\\\\\\\\\\":[\\\\\\\\\\\\\\"10296\\\\\\\\\\\\\\"]}\\\\\\"]}\\",\\"postbackParams\\":\\"{\\\\\\"processed_chain_ids\\\\\\":[21171501,19703510,21097703,21304818,112140,19866286,19876219,21966768,19185677],\\\\\\"shown_res_count\\\\\\":9,\\\\\\"search_id\\\\\\":\\\\\\"0c86c715-1486-41a7-b022-2b8ee29b7333\\\\\\"}\\",\\"totalResults\\":35,\\"hasMore\\":true,\\"getInactive\\":false},\\"dineoutAdsMetaData\\":{},\\"appliedFilter\\":[{\\"filterType\\":\\"category_sheet\\",\\"filterValue\\":\\"delivery_home\\",\\"isHidden\\":true,\\"isApplied\\":true,\\"postKey\\":\\"{\\\\\\"category_context\\\\\\":\\\\\\"delivery_home\\\\\\"}\\"},{\\"filterType\\":\\"universal_dish_id\\",\\"filterValue\\":\\"10296\\",\\"isApplied\\":true,\\"postKey\\":\\"{\\\\\\"universal_dish_ids\\\\\\":[\\\\\\"10296\\\\\\"]}\\"}],\\"urlParamsForAds\\":{}}","addressId":0,"entityId":11,"entityType":"city","locationType":"","isOrderLocation":1,"cityId":11,"latitude":"23.0426620000000000","longitude":"72.5667290000000000","userDefinedLatitude":23.042662,"userDefinedLongitude":72.566729,"entityName":"Ahmedabad","orderLocationName":"Ahmedabad","cityName":"Ahmedabad","countryId":1,"countryName":"India","displayTitle":"Ahmedabad","o2Serviceable":true,"placeId":"3720","cellId":"4133887237286789120","deliverySubzoneId":3720,"placeType":"DSZ","placeName":"Ahmedabad","isO2City":true,"fetchFromGoogle":false,"fetchedFromCookie":true,"isO2OnlyCity":false,"address_template":[],"otherRestaurantsUrl":""}'
-#response = requests.post('https://www.zomato.com/webroutes/search/home', cookies=cookies, headers=headers, data=data)
-
-inc = 9
-n = 1
-processed_ids = [
-    21171501,19703510,21097703,21304818,
-    112140,19866286,19876219,21966768,19185677
-]
-while True:
-    json_data = {
-        'context': 'delivery',
-        'filters': '{"searchMetadata":{"previousSearchParams":"{\\"PreviousSearchId\\":\\"0c86c715-1486-41a7-b022-2b8ee29b7333\\",\\"PreviousSearchFilter\\":[\\"{\\\\\\"category_context\\\\\\":\\\\\\"delivery_home\\\\\\"}\\",\\"\\",\\"{\\\\\\"universal_dish_ids\\\\\\":[\\\\\\"10296\\\\\\"]}\\"]}","postbackParams":"{\\"processed_chain_ids\\":[21171501,19703510,21097703,21304818,112140,19866286,19876219,21966768,19185677],\\"shown_res_count\\":'+str(inc)+',\\"search_id\\":\\"0c86c715-1486-41a7-b022-2b8ee29b7333\\"}","totalResults":35,"hasMore":true,"getInactive":false},"dineoutAdsMetaData":{},"appliedFilter":[{"filterType":"category_sheet","filterValue":"delivery_home","isHidden":true,"isApplied":true,"postKey":"{\\"category_context\\":\\"delivery_home\\"}"},{"filterType":"universal_dish_id","filterValue":"10296","isApplied":true,"postKey":"{\\"universal_dish_ids\\":[\\"10296\\"]}"}],"urlParamsForAds":{}}',
-        'addressId': 0,
-        'entityId': 11,
-        'entityType': 'city',
-        'locationType': '',
-        'isOrderLocation': 1,
-        'cityId': 11,
-        'latitude': '23.0426620000000000',
-        'longitude': '72.5667290000000000',
-        'userDefinedLatitude': 23.042662,
-        'userDefinedLongitude': 72.566729,
-        'entityName': 'Ahmedabad',
-        'orderLocationName': 'Ahmedabad',
-        'cityName': 'Ahmedabad',
-        'countryId': 1,
-        'countryName': 'India',
-        'displayTitle': 'Ahmedabad',
-        'o2Serviceable': True,
-        'placeId': '3720',
-        'cellId': '4133887237286789120',
-        'deliverySubzoneId': 3720,
-        'placeType': 'DSZ',
-        'placeName': 'Ahmedabad',
-        'isO2City': True,
-        'fetchFromGoogle': False,
-        'fetchedFromCookie': True,
-        'isO2OnlyCity': False,
-        'address_template': [],
-        'otherRestaurantsUrl': '',
-    }
-
-    url = f'https://www.zomato.com/webroutes/search/home?page={n}'
-
-    response = requests.post(url, cookies=cookies, headers=headers, json=json_data)
-    if response.status_code == 200:
-
-        tree = json.loads(response.text)
-        box = tree['sections']['SECTION_SEARCH_RESULT']
-
-        for item in box:
-            name = item['info']['name']
-            print(name)
-
-        next = tree['sections']['SECTION_SEARCH_META_INFO']['searchMetaData']['hasMore']
-        if next:
-            n = n+1
-            inc = inc + 12
-            continue
-        else:
+        if response.status_code != 200:
+            print(f"❌ Failed on page {page_num} | Status: {response.status_code}")
             break
-    else:
-        print(response.status_code)
-# while True:
-#     json_data = {
-#         'context': 'delivery',
-#         'filters': json.dumps({
-#             "searchMetadata": {
-#                 "previousSearchParams": "{\"PreviousSearchId\":\"0c86c715-1486-41a7-b022-2b8ee29b7333\",\"PreviousSearchFilter\":[\"{\\\"category_context\\\":\\\"delivery_home\\\"}\",\"\",\"{\\\"universal_dish_ids\\\":[\\\"10296\\\"]}\"]}"
-#             },
-#             "postbackParams": {
-#                 "processed_chain_ids": processed_ids,   # ✅ UPDATED
-#                 "shown_res_count": inc,                 # ✅ UPDATED
-#                 "search_id": "0c86c715-1486-41a7-b022-2b8ee29b7333"
-#             },
-#             "totalResults": 35,
-#             "hasMore": True,
-#             "getInactive": False
-#         }),
-#         'addressId': 0,
-#         'entityId': 11,
-#         'entityType': 'city',
-#         'locationType': '',
-#         'isOrderLocation': 1,
-#         'cityId': 11,
-#         'latitude': '23.0426620000000000',
-#         'longitude': '72.5667290000000000',
-#         'userDefinedLatitude': 23.042662,
-#         'userDefinedLongitude': 72.566729,
-#         'entityName': 'Ahmedabad',
-#         'orderLocationName': 'Ahmedabad',
-#         'cityName': 'Ahmedabad',
-#         'countryId': 1,
-#         'countryName': 'India',
-#         'displayTitle': 'Ahmedabad',
-#         'o2Serviceable': True,
-#         'placeId': '3720',
-#         'cellId': '4133887237286789120',
-#         'deliverySubzoneId': 3720,
-#         'placeType': 'DSZ',
-#         'placeName': 'Ahmedabad',
-#         'isO2City': True,
-#         'fetchFromGoogle': False,
-#         'fetchedFromCookie': True,
-#         'isO2OnlyCity': False,
-#         'address_template': [],
-#         'otherRestaurantsUrl': '',
-#     }
-#
-#     response = requests.post(
-#         'https://www.zomato.com/webroutes/search/home',
-#         cookies=cookies,
-#         headers=headers,
-#         json=json_data
-#     )
-#
-#     if response.status_code != 200:
-#         print("Failed")
-#         break
-#
-#     tree = response.json()
-#
-#     box = tree['sections']['SECTION_SEARCH_RESULT']
-#
-#     if not box:
-#         break
-#
-#     seen_res_ids = set()
-#     processed_chain_ids = []
-#     shown_count = 0
-#     new_items = 0
-#
-#     for item in box:
-#         info = item.get('info', {})
-#         res_id = info.get('resId')
-#
-#         if res_id in seen_res_ids:
-#             continue  # 🔁 skip duplicate
-#
-#         seen_res_ids.add(res_id)
-#         new_items += 1
-#
-#         name = info.get('name')
-#         print(name)
-#
-#         # ✅ REAL chain id
-#         chain = info.get('chain')
-#         if chain and chain.get('chain_id'):
-#             processed_chain_ids.append(chain['chain_id'])
-#
-#     if new_items == 0:
-#         print("No new restaurants, stopping pagination")
-#         break
-#
-#     shown_count += new_items
-#
-#     has_more = tree['sections']['SECTION_SEARCH_META_INFO']['searchMetaData']['hasMore']
-#
-#     if has_more:
-#         inc += len(box)   # ✅ NOT FIXED 12, dynamic
-#         continue
-#     else:
-#         break
+
+        data = response.json()
+        sections = data.get("sections", {})
+
+        results = sections.get("SECTION_SEARCH_RESULT", [])
+        if not results:
+            break
+
+        for item in results:
+            info = item.get("info", {})
+            rating_info = info.get("rating", {})
+
+            restaurant = {
+                "Restaurant Name": info.get("name", ""),
+                "Res ID": info.get("resId", ""),
+                "Cuisines": ", ".join(
+                    c.get("name", "") for c in info.get("cuisine", []) if isinstance(c, dict)
+                ),
+                "Rating": rating_info.get("aggregate_rating", "0"),
+                "Reviews": rating_info.get("votes", "0"),
+                "Cost for Two": info.get("cft", {}).get("text", ""),
+                "Delivery Time": item.get("order", {}).get("deliveryTime", ""),
+                "Distance": item.get("distance", ""),
+                "Order URL": "https://www.zomato.com"
+                + item.get("cardAction", {}).get("clickUrl", ""),
+                "Status": "pending",
+            }
+
+            print(restaurant)
+
+        meta = sections.get("SECTION_SEARCH_META_INFO", {}).get("searchMetaData", {})
+        has_more = meta.get("hasMore", False)
+
+        postback_params = json.loads(meta.get("postbackParams", "{}"))
+        processed_ids = postback_params.get("processed_chain_ids", [])
+
+        if has_more:
+            filters_dict = json.loads(json_data["filters"])
+            postback = json.loads(filters_dict["searchMetadata"]["postbackParams"])
+
+            postback["processed_chain_ids"] = processed_ids
+            postback["shown_res_count"] = len(processed_ids)
+
+            filters_dict["searchMetadata"]["postbackParams"] = json.dumps(postback)
+            json_data["filters"] = json.dumps(filters_dict)
+
+        page_num += 1
+
+
+if __name__ == "__main__":
+    fetch_restaurants()
