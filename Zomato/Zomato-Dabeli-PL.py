@@ -1,6 +1,7 @@
 import requests
 import json
 from curl_cffi import requests
+import db_config
 
 cookies = {
     'fbcity': '11',
@@ -82,8 +83,7 @@ json_data = {
 }
 
 API_URL = r'https://www.zomato.com/webroutes/search/home'
-response = requests.post('https://www.zomato.com/webroutes/search/home', cookies=cookies, headers=headers,
-                         json=json_data)
+# response = requests.post('https://www.zomato.com/webroutes/search/home', cookies=cookies, headers=headers,json=json_data)
 
 #  Note: json_data will not be serialized by requests
 #  exactly as it was in the original request.
@@ -120,13 +120,27 @@ while has_more:
         distance = item.get("distance", "")
         # sections.SECTION_SEARCH_RESULT[0].order.actionInfo
         order_url = "https://www.zomato.com" + item.get("order", {}).get("actionInfo", {}).get("clickUrl","").replace("/order","") or  ""
-        restaurant_data = {"Restaurant Name": info.get("name", ""), "Res_id": info.get("resId", ""),
+        restaurant_data = {"Restaurant Name": info.get("name", ""),
+                           "Res_id": info.get("resId", ""),
                            "Cuisines": cuisines,
-                           "Rating": rating, "Reviews": votes, "Cost for Two": cost, "Delivery Time": delivery_time,
-                           "Offers": offers, "Distance": distance, "Order URL": order_url, "status": "pending"}
-        print(restaurant_data)
+                           "Rating": rating,
+                           "Reviews": votes,
+                           "Cost for Two": cost,
+                           "Delivery Time": delivery_time,
+                           "Offers": offers,
+                           "Distance": distance,
+                           "Order URL": order_url,
+                           "status": "pending"
+                           }
 
-    meta = sections.get('SECTION_SEARCH_M   ETA_INFO', {}).get('searchMetaData', {})
+        try:
+            db_config.pl.update_one({'Restaurant Name':info.get("name", "")},{'$set':restaurant_data}, upsert=True)
+            print(f"Insert restaurant data for {restaurant_data}")
+        except Exception as e:
+            print(e)
+        # print(restaurant_data)
+
+    meta = sections.get('SECTION_SEARCH_META_INFO', {}).get('searchMetaData', {})
     has_more = meta.get('hasMore', False)
     postback = meta.get('postbackParams', '{}')
     postback_data = json.loads(postback) if postback else {}
