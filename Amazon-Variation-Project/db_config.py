@@ -4,3 +4,4 @@ db = Client['Amazon-Variation-Project']
 
 
 pl = db['pl']
+pdp = db['pdp']
