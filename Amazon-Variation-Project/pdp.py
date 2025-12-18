@@ -97,8 +97,8 @@ for item in data:
         tree1 = html.fromstring(response1.text)
 
         cost = (tree1.xpath('//div[@class="a-section a-spacing-none aok-align-center aok-relative"]//span[@class="a-price-whole"]/text()') or [" "])[0].strip()
-        color = (tree1.xpath('//span[text()=" Colour: "]/following-sibling::span/text()') or [" "])[0].strip()
-        size = (tree1.xpath('//span[text()=" Size: "]/following-sibling::span/text()') or [" "])[0].strip()
+        color = (tree1.xpath('//span[contains(text(),"Colour:")]/following-sibling::span/text()') or [" "])[0].strip()
+        size = (tree1.xpath('//span[contains(text(),"Size:")]/following-sibling::span/text()') or [" "])[0].strip()
 
         data1 = {
             'url': url1,
