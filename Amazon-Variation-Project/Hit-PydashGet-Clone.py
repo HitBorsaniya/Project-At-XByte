@@ -37,6 +37,7 @@ item = {
 }
 
 print("Value : ",my_pydash(item, "data.value.product name"))
+print("Value : ",my_pydash(item, "data.value['product name']"))
 print("Value : ",my_pydash(item, 'data["value"]["product name"]'))
 print("Value : ",my_pydash(item, "data.value.prices[1]"))
 print("Value : ",my_pydash(item, "sections[0].trackingData[0].table_name"))
