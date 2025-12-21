@@ -86,20 +86,22 @@ def get_pl_data():
 
         for val in rows:
 
-            color_labels = []
-
-
-            # Children colors
-            for child in rows1.get("children", []):
-                for attr in child.get("productAttributeDropdown", []):
-                    if attr.get("Attribute", {}).get("attribute_code") == "color":
-                        color_labels.append(attr.get("AttributeOption" , {}).get("optionValue"))
-            print(color_labels)
-
+            color_labels = val.get('productAttributeDropdown', [])
+            color = ""
+            shape = ""
             area = ""
-            for i in val.get("productAttributeDropdown", []):
-                if i.get("Attribute", {}).get("attribute_code") == "area":
-                    area = i.get("AttributeOption", {}).get("optionValue")
+            mount_type = ""
+
+            for i in color_labels:
+                if i.get("Attribute", {}).get("name") == 'Color':
+                    color = (i.get("AttributeOption", {}).get("optionValue"))
+                if i.get("Attribute", {}).get("name") == 'Shape':
+                    shape = (i.get("AttributeOption", {}).get("optionValue"))
+                if i.get("Attribute", {}).get("name") == 'Area':
+                    area = (i.get("AttributeOption", {}).get("optionValue"))
+                if i.get("Attribute", {}).get("name") == 'Mount Type':
+                    area = (i.get("AttributeOption", {}).get("optionValue"))
+
 
 
             last_name = url.rstrip("/").split("/")[-1]
@@ -108,18 +110,26 @@ def get_pl_data():
                 'Category Name ': last_name,
                 'Product Name': val.get('product_name') or " ",
                 'Price' : val.get('price') or " ",
-                # 'PDP' : val.get('children', []).get('alias') or " ",
-                'PDP':pydash.get(val, 'children[0].alias') or pydash.get(val, 'alias'),
-                'Image': pydash.get(val, 'children[0].hnd_product_images[0].product_image') or pydash.get(val,'hnd_product_images[0].product_image' ),
+                'PDP' : f"https://hindware.com/p/bath/{pydash.get(val, 'children[0].alias') or pydash.get(val, 'alias') or " "}",
+                'Image': pydash.get(val, 'children[0].hnd_product_images[0].product_image') or pydash.get(val,'hnd_product_images[0].product_image' ) or " ",
                 'ProductType': val.get('product_type'),
-                'Color': " | ".join (item for item in color_labels),
+                'Color': color,
+                'Shape': shape,
+                'Area': area,
+                'Mount Type': area,
                 'sku': val.get('sku'),
                 'status': 'pending'
             }
 
             print(dict_data)
-            # data.rows[0].children[0].hnd_product_images[0].product_image
-            # data.rows[0].children[1].productAttributeDropdown[1].AttributeOption.optionLabel
+
+def add_data_db(data):
+    try:
+        db_config.pl.update_one({'PDP', data['PDP']}, {'$set': data}, upsert=True)
+        print("Data DB Inserted")
+    except Exception as e:
+        print(e)
+
 
 if __name__ == '__main__':
     get_pl_data()
