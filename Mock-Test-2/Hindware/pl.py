@@ -102,8 +102,6 @@ def get_pl_data():
                 if i.get("Attribute", {}).get("name") == 'Mount Type':
                     area = (i.get("AttributeOption", {}).get("optionValue"))
 
-
-
             last_name = url.rstrip("/").split("/")[-1]
 
             dict_data = {
@@ -121,15 +119,23 @@ def get_pl_data():
                 'status': 'pending'
             }
 
-            print(dict_data)
+            add_data_db(dict_data)
+            # print(dict_data)
+        update_cate_status(data)
 
 def add_data_db(data):
     try:
-        db_config.pl.update_one({'PDP', data['PDP']}, {'$set': data}, upsert=True)
+        db_config.pl.update_one({'PDP': data['PDP']}, {'$set': data}, upsert=True)
         print("Data DB Inserted")
     except Exception as e:
         print(e)
 
+def update_cate_status(data):
+    try:
+        db_config.cate.update_one({'key': data['key']}, {'$set' : {'status':'pending'}})
+        print(f"{data['key']} status updated")
+    except Exception as e:
+        print(e)
 
 if __name__ == '__main__':
     get_pl_data()
